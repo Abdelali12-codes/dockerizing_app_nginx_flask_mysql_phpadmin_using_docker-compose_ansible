@@ -1,0 +1,20 @@
+- name: popping up nginx and openresty containers
+  hosts: all
+
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  roles:
+   - {role: docker, become: yes}
+
+  tasks:
+    - name: copy Docker Compose file
+      copy:
+        src: docker-compose.yml
+        dest: /tmp
+
+    - name: deploy Docker Compose services
+      become: yes
+      docker_compose:
+        project_src: /tmp
+        state: present

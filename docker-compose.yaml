@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  flask:
+    container_name: web_app
+    build: ./python
+    # command: flask run -h 0.0.0.0
+    command: gunicorn --bind 0.0.0.0:5000 app:app
+    ports:
+      - 5000:5000
+    links:
+      - "db"
+  db:
+    image: mysql:5.7
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: flask_db
+      MYSQL_USER: abdelali
+      MYSQL_PASSWORD: password
+    # ports:
+    #   - "3306:3306"
+    expose:
+      - 3306
+    volumes:
+      - dbdata:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8081:80
+  nginx:
+    container_name: nginx_server
+    build: ./nginx
+    ports:
+      - 80:80
+    depends_on:
+      - "flask"
+
+volumes:
+  dbdata:
+
+
+
+# db:
+  #   container_name: postgres
+  #   image: postgres:13-alpine
+  #   networks:
+  #     - my-network
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data/
+  #   environment:
+  #     - POSTGRES_USER=abdelali
+  #     - POSTGRES_PASSWORD=abdelali
+  #     - POSTGRES_DB=abdelalidb
